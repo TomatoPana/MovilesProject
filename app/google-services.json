@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "577926442776",
+    "firebase_url": "https://locationreminders-f013c-default-rtdb.firebaseio.com",
+    "project_id": "locationreminders-f013c",
+    "storage_bucket": "locationreminders-f013c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577926442776:android:1de710c6dc01849531786d",
+        "android_client_info": {
+          "package_name": "com.mdlb.project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "577926442776-jcp6is02rfen8m4k0k1bdlng56j9eeod.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mdlb.project",
+            "certificate_hash": "977035359050e310faaa04c62586a5c141b5a947"
+          }
+        },
+        {
+          "client_id": "577926442776-fatn6qm093c9he8346i622868stt66pe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzNLWN9X-Ea_aAg6QBM-0yjSN2-UAfRJE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "577926442776-fatn6qm093c9he8346i622868stt66pe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

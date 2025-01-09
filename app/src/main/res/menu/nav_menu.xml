@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/notes"
+        android:icon="@drawable/baseline_notes"
+        android:title="Notes"  />
+    <item
+        android:id="@+id/alarms"
+        android:icon="@drawable/baseline_alarm_24"
+        android:title="Alarms" />
+    <item
+        android:id="@+id/maps"
+        android:icon="@drawable/location_alt_24"
+        android:title="Maps" />
+</menu>
