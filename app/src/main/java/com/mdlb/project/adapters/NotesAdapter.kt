@@ -49,11 +49,11 @@ class NotesAdapter(private var notesList: ArrayList<NoteModel>) :
             MaterialAlertDialogBuilder(holder.itemView.context)
                 .setTitle("Confirm action")
                 .setMessage("Are you sure you want to delete this note?")
-                .setPositiveButton("Yes") { dialog, which ->
+                .setPositiveButton("Yes") { _, _ ->
                     notesList.removeAt(position)
                     notifyDataSetChanged()
                 }
-                .setNegativeButton("No") { dialog, which ->
+                .setNegativeButton("No") { dialog, _ ->
                     dialog.dismiss()
                 }
                 .show()

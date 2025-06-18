@@ -2,24 +2,35 @@ package com.mdlb.project
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.ClearCredentialException
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.mdlb.project.activities.NotesActivity
 import com.mdlb.project.fragments.AlarmsFragment
 import com.mdlb.project.fragments.MapsFragment
 import com.mdlb.project.fragments.NotesFragment
+import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 class WelcomePage : AppCompatActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var fab: FloatingActionButton
+    private lateinit var topBar: MaterialToolbar
     private var screen = "notes"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +44,38 @@ class WelcomePage : AppCompatActivity() {
             insets
         }
         onBackPressedDispatcher.addCallback { finishAffinity() }
+
+        topBar = findViewById(R.id.topAppBar)
+        topBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.logout_action -> {
+                    Toast.makeText(this, "Logout", Toast.LENGTH_SHORT).show()
+                    Firebase.auth.signOut()
+                    // When a user signs out, clear the current user credential state from all credential providers.
+                    lifecycleScope.launch {
+                        try {
+                            val clearRequest = ClearCredentialStateRequest()
+                            val credentialManager = CredentialManager.create(baseContext)
+                            credentialManager.clearCredentialState(clearRequest)
+
+                        } catch (e: ClearCredentialException) {
+                            Log.e("WelcomePage", "Couldn't clear user credentials: ${e.localizedMessage}")
+                        }
+                    }
+
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+
+                    true
+                }
+                R.id.select_elements_action -> {
+                    Toast.makeText(this, "Select elements", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
 
         fab = findViewById(R.id.floating_action_button)
         fab.setOnClickListener {

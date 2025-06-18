@@ -44,17 +44,17 @@ class NotesFragment : Fragment() {
         chk_select_all = view.findViewById(R.id.chk_select_all)
         btn_delete_all = view.findViewById(R.id.btn_delete_all)
 
+        // Try to fetch the notes collection of the user using Firestore
+
+
         notesList.add(NoteModel().apply { title = "Title 1"; content = "Content 1"; date = "2024-12-01"; id = "1"; })
-        notesList.add(NoteModel().apply { title = "Title 2"; content = "Content 2"; date = "2024-12-01"; id = "2"; photoUrl = "2"})
+        notesList.add(NoteModel().apply { title = "Title 2"; content = "Content 2"; date = "2024-12-01"; id = "2"; })
         notesList.add(NoteModel().apply { title = "Title 3"; content = "Content 3"; date = "2024-12-01"; id = "3"; })
-        notesList.add(NoteModel().apply { title = "Title 4"; content = "Content 4"; date = "2024-12-01"; id = "4"; photoUrl = "1"})
+        notesList.add(NoteModel().apply { title = "Title 4"; content = "Content 4"; date = "2024-12-01"; id = "4"; })
         notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
-        notesList.add(NoteModel().apply { title = "Title 5"; content = "Content 5"; date = "2024-12-01"; id = "5"; })
+        notesList.add(NoteModel().apply { title = "Title 6"; content = "Content 6"; date = "2024-12-01"; id = "6"; })
+        notesList.add(NoteModel().apply { title = "Title 7"; content = "Content 7"; date = "2024-12-01"; id = "7"; })
+        notesList.add(NoteModel().apply { title = "Title 8"; content = "Content 8"; date = "2024-12-01"; id = "8"; })
 
         recyclerView.setHasFixedSize(true)
         recyclerView.setLayoutManager(LinearLayoutManager(this.context))

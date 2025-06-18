@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.mdlb.project"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.mdlb.project"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -55,7 +55,19 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.storage.ktx)
+
+    implementation(libs.firebase.firestore.ktx)
+
+    implementation(libs.google.firebase.auth)
+    implementation(libs.com.google.firebase.firebase.auth)
+
+    // Also add the dependencies for the Credential Manager libraries and specify their versions
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     implementation(libs.play.services.maps)
 
 }
