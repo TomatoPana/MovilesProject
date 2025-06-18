@@ -1,6 +1,7 @@
 package com.mdlb.project.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -34,10 +35,26 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.Date
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.view.MotionEvent
+import android.widget.CheckBox
+import android.widget.ScrollView
+import androidx.annotation.RequiresPermission
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.LocationServices
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.mdlb.project.alarms.AlarmReceiver
+import com.mdlb.project.geofencing.GeofenceHelper
+import com.google.android.gms.location.GeofencingClient
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import com.mdlb.project.viewmodels.NoteViewModel
 
 class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -46,6 +63,8 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
     private var noteId: String? = null
 
     private var imageUri: Uri? = null
+
+    private lateinit var viewModel: NoteViewModel
 
     private lateinit var titleTextField: TextInputLayout
     private lateinit var contentTextField: TextInputLayout
@@ -57,6 +76,10 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapHolder: FragmentContainerView
     private lateinit var saveButton: Button
     private lateinit var dateTextField: TextInputLayout
+    private lateinit var timeTextField: TextInputLayout
+    private lateinit var scrollView: ScrollView
+    private lateinit var transparentView: View
+    private lateinit var enableAlarmsCheckbox: CheckBox
 
     private lateinit var mMap: GoogleMap
     private var locationMarker: Marker? = null
@@ -91,6 +114,9 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
+    private lateinit var geofencingClient: GeofencingClient
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -101,12 +127,33 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
+        viewModel = ViewModelProvider(this)[NoteViewModel::class.java]
+
         intent.getStringExtra("id")?.let {
             noteId = it
             isEdit = true
         }
 
         initElements()
+
+        // Set the listener on the transparent view
+        transparentView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // When the user touches the map, disable the ScrollView's touch interception
+                    scrollView.requestDisallowInterceptTouchEvent(true)
+                    false // Do not consume the event, let the map handle it
+                }
+                MotionEvent.ACTION_UP -> {
+                    // When the user releases the touch, allow the ScrollView to intercept touches again
+                    scrollView.requestDisallowInterceptTouchEvent(false)
+                    false // Do not consume the event
+                }
+                else -> {
+                    false
+                }
+            }
+        }
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapHolder) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -156,7 +203,101 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        saveButton.setOnClickListener {}
+        timeTextField.editText?.setOnClickListener {
+            val timePicker =
+                MaterialTimePicker.Builder()
+                    .setTitleText("Select time")
+                    .build()
+
+            timePicker.show(supportFragmentManager, "TIME_PICKER")
+
+            timePicker.addOnPositiveButtonClickListener {
+                val selectedHour = timePicker.hour
+                val selectedMinute = timePicker.minute
+                val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+
+                timeTextField.editText?.setText(formattedTime)
+            }
+        }
+
+        saveButton.setOnClickListener {
+            titleTextField.error = null
+            contentTextField.error = null
+            dateTextField.error = null
+            timeTextField.error = null
+
+            // Check if at least Title and content was filled
+            val title = titleTextField.editText?.text.toString()
+            val content = contentTextField.editText?.text.toString()
+
+            if (title.isBlank()) {
+                titleTextField.error = "Fill the title, please"
+                return@setOnClickListener
+            }
+
+            if (content.isBlank()) {
+                contentTextField.error = "Fill the content, please"
+                return@setOnClickListener
+            }
+
+            // For the alarm, if enable the alarm is checked.
+            // Get the info or notify to fill date and time
+            if (enableAlarmsCheckbox.isChecked && dateTextField.editText?.text.toString().isBlank()) {
+                dateTextField.error = "Select a date if you want to set an alarm"
+                return@setOnClickListener
+            }
+
+            if (enableAlarmsCheckbox.isChecked && timeTextField.editText?.text.toString().isBlank()) {
+                timeTextField.error = "Select a time if you want to set an alarm"
+                return@setOnClickListener
+            }
+
+            // Save the photo to Firestore and get the URL
+            if (imageUri !== null) {
+                // There is a photo, save it
+                val storageRef = Firebase.storage.reference
+                val userId = Firebase.auth.currentUser?.uid ?: return@setOnClickListener
+
+                val imageRef = storageRef.child("notes/${userId}/${System.currentTimeMillis()}_${imageUri?.lastPathSegment}")
+                imageUri!!.let {
+                    val uploadTask = imageRef.putFile(it)
+                    uploadTask.addOnSuccessListener { taskSnapshot ->
+                        taskSnapshot.storage.downloadUrl.addOnSuccessListener { downloadUrl ->
+                            saveNoteToDatabase(downloadUrl.toString())
+                        }
+                    }.addOnFailureListener { e ->
+                        // Handle unsuccessful uploads
+                        Toast.makeText(this, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                saveNoteToDatabase(null)
+            }
+        }
+    }
+
+    private fun saveNoteToDatabase(imageUrl: String?) {
+        var lat: Double? = null
+        var lng: Double? = null
+        // Here, everything was validated, so we can save the note to the database
+        if (reminderLocation !== null) {
+            // There is a location, extract lat and lng
+            lat = reminderLocation!!.latitude
+            lng = reminderLocation!!.longitude
+        }
+        // Save the note to the database
+        viewModel.addNote(
+            titleTextField.editText?.text.toString(),
+            contentTextField.editText?.text.toString(),
+            imageUrl,
+            lat,
+            lng,
+            dateTextField.editText?.text.toString(),
+            timeTextField.editText?.text.toString(),
+            enableAlarmsCheckbox.isChecked
+        )
+        Toast.makeText(this, "Note saved", Toast.LENGTH_SHORT).show()
+        finish()
     }
 
     private fun initElements() {
@@ -170,6 +311,10 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
         mapHolder = findViewById(R.id.mapHolder)
         saveButton = findViewById(R.id.saveButton)
         dateTextField = findViewById(R.id.dateTextField)
+        timeTextField = findViewById(R.id.timeTextField)
+        scrollView = findViewById(R.id.scrollView)
+        transparentView = findViewById(R.id.transparent_view)
+        enableAlarmsCheckbox = findViewById(R.id.enable_alarms_checkbox)
     }
 
     private fun preventBackOnPendingChanges() {
@@ -282,5 +427,52 @@ class NotesActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
             context.startActivity(intent)
         }
+    }
+
+    fun scheduleAlarm(context: Context, reminderId: String, title: String, triggerAtMillis: Long) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("REMINDER_ID", reminderId)
+            putExtra("REMINDER_TITLE", title)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            reminderId.hashCode(), // Use a unique request code for each alarm
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Use setExactAndAllowWhileIdle for precision, even in Doze mode
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    fun addGeofenceForReminder(reminderId: String, latitude: Double, longitude: Double, radius: Float) {
+        geofencingClient = LocationServices.getGeofencingClient(applicationContext)
+
+        val geofenceHelper = GeofenceHelper(applicationContext)
+        val geofence = geofenceHelper.getGeofence(
+            reminderId,
+            latitude,
+            longitude,
+            radius,
+            Geofence.GEOFENCE_TRANSITION_ENTER
+        )
+        val geofencingRequest = geofenceHelper.getGeofencingRequest(geofence)
+
+        // You need to handle the permission check before this call
+        geofencingClient.addGeofences(geofencingRequest, geofenceHelper.geofencePendingIntent)
+            .addOnSuccessListener {
+                // Geofence added successfully
+            }
+            .addOnFailureListener {
+                // Failed to add geofence
+            }
     }
 }

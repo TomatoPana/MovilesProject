@@ -16,6 +16,11 @@ class BootCompletedReceiver : BroadcastReceiver() {
             CoroutineScope(Dispatchers.IO).launch {
                 rescheduleAlarms(context)
             }
+
+            // Re-register Geofences
+            CoroutineScope(Dispatchers.IO).launch {
+                registerGeofences(context)
+            }
         }
     }
 
@@ -43,5 +48,10 @@ class BootCompletedReceiver : BroadcastReceiver() {
             .addOnFailureListener {
                 // Handle failure
             }
+    }
+
+    private suspend fun registerGeofences(context: Context) {
+        // Fetch all active reminders from Firebase for the current user
+        // TODO: Implement this logic
     }
 }

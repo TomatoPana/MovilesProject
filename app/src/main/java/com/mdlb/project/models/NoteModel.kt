@@ -13,6 +13,13 @@ data class NoteModel(
     var timestamp: Date? = null,
 
     var photoUrl: String? = null,
+
     var latitude: Double? = null,
-    var longitude: Double? = null
+    var longitude: Double? = null,
+    var hasLocation: Boolean = false,
+
+    var date: String? = null,
+    var time: String? = null,
+    var enableAlarms: Boolean = false
+
 ) : Serializable

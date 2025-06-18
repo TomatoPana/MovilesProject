@@ -72,6 +72,11 @@ dependencies {
 
     implementation(libs.glide)
 
+
+    // Kotlin Coroutines for asynchronous operations
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
 }
 
 secrets {

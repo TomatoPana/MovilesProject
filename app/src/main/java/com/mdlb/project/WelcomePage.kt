@@ -69,10 +69,6 @@ class WelcomePage : AppCompatActivity() {
 
                     true
                 }
-                R.id.select_elements_action -> {
-                    Toast.makeText(this, "Select elements", Toast.LENGTH_SHORT).show()
-                    true
-                }
                 else -> false
             }
         }
@@ -100,12 +96,6 @@ class WelcomePage : AppCompatActivity() {
                     screen = "notes"
                     fab.show()
                     loadFragment(NotesFragment())
-                    true
-                }
-                R.id.alarms -> {
-                    screen = "alarms"
-                    fab.show()
-                    loadFragment(AlarmsFragment())
                     true
                 }
                 R.id.maps -> {

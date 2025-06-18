@@ -28,7 +28,6 @@ class NotesAdapter(
         val title: TextView = view.findViewById(R.id.title)
         val content: TextView = view.findViewById(R.id.subtitle)
         val date: TextView = view.findViewById(R.id.created_at)
-        val photo: ImageView = view.findViewById(R.id.img_note)
         val cardHolder: MaterialCardView = view.findViewById(R.id.note_card)
         val editButton: Button = view.findViewById(R.id.editButton)
         val deleteButton: Button = view.findViewById(R.id.deleteButton)
@@ -46,7 +45,6 @@ class NotesAdapter(
         holder.title.text = note.title
         holder.content.text = note.content
         holder.date.text = "Created at: " + SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US).format(note.timestamp ?: Date())
-        holder.photo.visibility = if (note.photoUrl != null) View.VISIBLE else View.GONE
 
         holder.editButton.setOnClickListener { onEdit(note) }
         holder.deleteButton.setOnClickListener { onDelete(note) }

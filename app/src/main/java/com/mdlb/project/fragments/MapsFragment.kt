@@ -19,10 +19,15 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.mdlb.project.PermissionUtils
 import com.mdlb.project.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.mdlb.project.PermissionUtils.isPermissionGranted
 import com.mdlb.project.R
+import com.mdlb.project.models.NoteModel
 
 class MapsFragment : Fragment(),
     OnMapReadyCallback,
@@ -32,6 +37,11 @@ class MapsFragment : Fragment(),
 
     private lateinit var map: GoogleMap
     private var permissionDenied = false
+
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private lateinit var notes: List<NoteModel>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +61,8 @@ class MapsFragment : Fragment(),
         googleMap.setOnMyLocationButtonClickListener(this)
         enableMyLocation()
 
-
+        // Load all the locations from Firebase and add markers
+        loadNotes()
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireContext())
 
@@ -60,10 +71,31 @@ class MapsFragment : Fragment(),
                 // Got last known location. In some rare situations this can be null.
                 val cameraPosition = CameraPosition.Builder()
                     .target(LatLng(location?.latitude ?: 0.0, location?.longitude ?: 0.0))
-                    .zoom(20f)
+                    .zoom(16f)
                     .build()
 
                 map.animateCamera(newCameraPosition(cameraPosition))
+            }
+    }
+
+    private fun loadNotes() {
+        val user = auth.currentUser ?: return
+        firestore.collection("users")
+            .document(user.uid)
+            .collection("notes")
+            .whereEqualTo("hasLocation", true)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val notes = snapshot.documents.map {
+                    val note = it.toObject(NoteModel::class.java)
+                    note?.copy(id = it.id) ?: NoteModel()
+                }
+                this.notes = notes
+                notes.forEach { note ->
+                    val location = LatLng(note.latitude!!, note.longitude!!)
+                    map.addMarker(MarkerOptions().position(location).title(note.title))
+                }
             }
     }
 

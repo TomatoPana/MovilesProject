@@ -29,6 +29,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -73,13 +74,21 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetStart="8dp"
+                app:dividerInsetEnd="8dp"
+                android:layout_margin="16dp" />
+
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/notes_optional_add_image_text_view" />
+                android:text="@string/notes_optional_add_image_text_view"
+                android:textSize="24sp"/>
 
             <LinearLayout
                 android:id="@+id/buttonLinearLayout"
@@ -135,20 +144,40 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetStart="8dp"
+                app:dividerInsetEnd="8dp"
+                android:layout_margin="16dp" />
+
             <TextView
                 android:id="@+id/location_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Add a location" />
+                android:text="(Optional) Add a location"
+                android:textSize="24sp"/>
 
-            <androidx.fragment.app.FragmentContainerView
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:id="@+id/mapHolder"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
-                android:layout_margin="8dp" />
+                android:layout_height="300dp">
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/mapHolder"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_margin="8dp" />
+
+                <View
+                    android:id="@+id/transparent_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent" />
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/location_helper_text_view"
@@ -159,12 +188,28 @@
                 android:text="Hint: Create the location with long press"
                 android:textStyle="italic" />
 
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetStart="8dp"
+                app:dividerInsetEnd="8dp"
+                android:layout_margin="16dp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Add an Alarm" />
+                android:text="(Optional) Add an Alarm"
+                android:textSize="24sp"/>
+
+            <CheckBox
+                android:id="@+id/enable_alarms_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Enable the Alarm" />
 
             <LinearLayout
                 android:id="@+id/alarmLinearLayout"
@@ -204,16 +249,26 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
-                    android:enabled="false"
                     android:hint="Select a time">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:inputType="none" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetStart="8dp"
+                app:dividerInsetEnd="8dp"
+                android:layout_margin="16dp" />
 
             <Button
                 android:id="@+id/saveButton"

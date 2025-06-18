@@ -26,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:minHeight="?attr/actionBarSize"
                 app:title="Notes"
-                app:subtitle="0 of 14 selected"
                 app:titleCentered="true"
                 app:subtitleCentered="true"
                 app:menu="@menu/top_app_bar" />
