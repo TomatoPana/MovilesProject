@@ -70,6 +70,8 @@ dependencies {
 
     implementation(libs.play.services.maps)
 
+    implementation(libs.glide)
+
 }
 
 secrets {

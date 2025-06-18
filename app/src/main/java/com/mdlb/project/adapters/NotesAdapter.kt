@@ -14,65 +14,48 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mdlb.project.R
 import com.mdlb.project.activities.NotesActivity
 import com.mdlb.project.models.NoteModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class NotesAdapter(private var notesList: ArrayList<NoteModel>) :
-    RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
+class NotesAdapter(
+    private var notesList: List<NoteModel>,
+    private val onEdit: (NoteModel) -> Unit,
+    private val onDelete: (NoteModel) -> Unit
+) : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.note_item, parent, false)
-        return ViewHolder(view)
+    inner class NoteViewHolder (view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.title)
+        val content: TextView = view.findViewById(R.id.subtitle)
+        val date: TextView = view.findViewById(R.id.created_at)
+        val photo: ImageView = view.findViewById(R.id.img_note)
+        val cardHolder: MaterialCardView = view.findViewById(R.id.note_card)
+        val editButton: Button = view.findViewById(R.id.editButton)
+        val deleteButton: Button = view.findViewById(R.id.deleteButton)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.title.text = notesList[position].title
-        holder.content.text = notesList[position].content
-        holder.date.text = notesList[position].date
-        holder.photo.visibility = if (notesList[position].photoUrl != null) View.VISIBLE else View.GONE
-        holder.cardHolder.setOnLongClickListener {
-            notesList[position].isSelected = !notesList[position].isSelected
-            notifyDataSetChanged()
-            true
-        }
-        holder.cardHolder.setOnClickListener {
-            if (notesList[position].isSelected) {
-                notesList[position].isSelected = false
-            } else {
-                // Open note
-            }
-            notifyDataSetChanged()
-        }
-        holder.editButton.setOnClickListener {
-            val intent = Intent(holder.itemView.context, NotesActivity::class.java)
-            startActivity(holder.itemView.context, intent, null)
-        }
-        holder.deleteButton.setOnClickListener {
-            MaterialAlertDialogBuilder(holder.itemView.context)
-                .setTitle("Confirm action")
-                .setMessage("Are you sure you want to delete this note?")
-                .setPositiveButton("Yes") { _, _ ->
-                    notesList.removeAt(position)
-                    notifyDataSetChanged()
-                }
-                .setNegativeButton("No") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.note_item, parent, false)
+
+        return NoteViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return notesList.size
+    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+        val note = notesList[position]
+        holder.title.text = note.title
+        holder.content.text = note.content
+        holder.date.text = "Created at: " + SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US).format(note.timestamp ?: Date())
+        holder.photo.visibility = if (note.photoUrl != null) View.VISIBLE else View.GONE
+
+        holder.editButton.setOnClickListener { onEdit(note) }
+        holder.deleteButton.setOnClickListener { onDelete(note) }
     }
 
-    class ViewHolder (view: View) : RecyclerView.ViewHolder(view) {
-        // Holds the TextView that will add each animal to
-        val title = view.findViewById<TextView>(R.id.title)
-        val content = view.findViewById<TextView>(R.id.subtitle)
-        val date = view.findViewById<TextView>(R.id.created_at)
-        val photo = view.findViewById<ImageView>(R.id.img_note)
-        val cardHolder = view.findViewById<MaterialCardView>(R.id.note_card)
-        val editButton = view.findViewById<Button>(R.id.editButton)
-        val deleteButton = view.findViewById<Button>(R.id.deleteButton)
+    override fun getItemCount() = notesList.size
 
+    fun updateList(newNotes: List<NoteModel>) {
+        notesList = newNotes
+        notifyDataSetChanged()
     }
 }

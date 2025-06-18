@@ -1,12 +1,18 @@
 package com.mdlb.project.models
 
+import com.google.firebase.firestore.ServerTimestamp
 import java.io.Serializable
+import java.util.Date
 
 data class NoteModel(
-    var title: String? = null,
-    var content: String? = null,
-    var date: String? = null,
+    var id: String = "",
+    var title: String = "",
+    var content: String = "",
+
+    @ServerTimestamp
+    var timestamp: Date? = null,
+
     var photoUrl: String? = null,
-    var id: String? = null,
-    var isSelected: Boolean = false,
+    var latitude: Double? = null,
+    var longitude: Double? = null
 ) : Serializable

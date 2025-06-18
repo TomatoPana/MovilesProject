@@ -3,6 +3,7 @@ agp = "8.10.1"
 credentials = "1.5.0"
 firebaseBom = "33.7.0"
 firebaseBomVersion = "33.1.1"
+glide = "4.16.0"
 googleFirebaseBom = "33.15.0"
 googleid = "1.1.1"
 kotlin = "1.9.0"
@@ -34,6 +35,7 @@ firebase-bom-v33150 = { module = "com.google.firebase:firebase-bom", version.ref
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 google-firebase-auth = { module = "com.google.firebase:firebase-auth" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -48,7 +48,7 @@ class NoteViewModel: ViewModel() {
         firestore.collection("users")
                         .document(user.uid)
                         .collection("notes")
-                        .document(note.id!!)
+                        .document(note.id)
                         .set(note)
     }
 
